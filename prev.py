@@ -66,7 +66,7 @@ def parseDataCared(house_list):
         print(house)
 
 
-def mainGetHouseList(region_code, options):
+def getFullHouseList(region_code, options):
     number = 0
     totalNumber = 0
     while number <= totalNumber:
@@ -110,4 +110,4 @@ if __name__ == '__main__':
         'not_cover': 1,
         'totalRows': 90
     }
-    mainGetHouseList(taipei_region_code, options)
+    getFullHouseList(taipei_region_code, options)
