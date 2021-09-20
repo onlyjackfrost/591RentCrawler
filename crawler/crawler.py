@@ -13,8 +13,7 @@ import pprint
 def getHouseListHtml(session, region_code, row_Number, options):
     url_getHouseListApi = 'https://rent.591.com.tw/home/search/rsList'
     options['firstRow'] = row_Number
-    # if not csrf_Token :
-    #     updateCsrfToken() 
+    
     my_headers = {'X-CSRF-TOKEN': csrf_Token}
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(my_headers)
@@ -52,8 +51,6 @@ def getFullHouseList(region_code, options):
 
         house_list = getHouseList(html_text)
         houseList += house_list
-        # pp = pprint.PrettyPrinter(indent=4)
-        # pp.pprint(house_list[0])
 
         number += 30
         totalNumber = getTotalNumber(html_text)

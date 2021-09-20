@@ -25,4 +25,6 @@ def crawTaipeiHouseList():
     option2 = get_basicOption()
     option2['kind'] = 2 #獨立套房
     houseList2 = getFullHouseList(taipei_region_code, option2)
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(house_list[0])
     return houseList1 + houseList2
