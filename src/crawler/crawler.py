@@ -4,6 +4,7 @@ import toolHelper as tool
 import time
 import pprint
 
+
 #api範例:
 #https://rent.591.com.tw/home/search/rsList?is_new_list=1&type=1&kind=0&searchtype=1&region=3&firstRow=30&totalRows=9005
 #https://rent.591.com.tw/home/search/rsList?is_new_list=1&type=1&kind=0&searchtype=1&region=3&firstRow=60&totalRows=9010
@@ -13,10 +14,10 @@ import pprint
 def getHouseListHtml(session, region_code, row_Number, options):
     url_getHouseListApi = 'https://rent.591.com.tw/home/search/rsList'
     options['firstRow'] = row_Number
-    
+
     my_headers = {'X-CSRF-TOKEN': csrf_Token}
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(my_headers)
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(my_headers)
     response = session.get(url_getHouseListApi,
                            headers=my_headers,
                            params=options,
@@ -29,27 +30,26 @@ def getHouseListHtml(session, region_code, row_Number, options):
     return html_text
 
 
-
-
-def getFullHouseList(region_code, options):
+def getFullHouseList(region_code, options, filter_func=None):
     number = 0
     totalNumber = 0
     loop = 0
     houseList = []
-    print('11111')
+    # print('11111')
     while number <= totalNumber:
         if loop > 20:
             break
         loop += 1
-        html_text = getHouseListHtml(session, region_code, number,
-                                     options)
-        print(html_text)
+        html_text = getHouseListHtml(session, region_code, number, options)
+        # print(html_text)
 
         if html_text == "":
             tool.logCrawlProgress("failure, fuck\n")
             break
 
         house_list = getHouseList(html_text)
+        if filter_func:
+            house_list = filter_func(house_list)
         houseList += house_list
 
         number += 30

@@ -4,6 +4,7 @@ import copy
 taipei_region_code = 1
 newtaipei_region_code = 3
 
+
 def get_basicOption():
     basicOption = {
         'type': 1,
@@ -17,14 +18,15 @@ def get_basicOption():
     }
     return copy.deepcopy(basicOption)
 
-def crawTaipeiHouseList():
+
+def crawTaipeiHouseList(filter_func=None):
     option1 = get_basicOption()
-    option1['kind'] = 1 #整層住家
-    houseList1 = getFullHouseList(taipei_region_code, option1)
-    
+    option1['kind'] = 1  #整層住家
+    houseList1 = getFullHouseList(taipei_region_code, option1, filter_func)
+
     option2 = get_basicOption()
-    option2['kind'] = 2 #獨立套房
-    houseList2 = getFullHouseList(taipei_region_code, option2)
+    option2['kind'] = 2  #獨立套房
+    houseList2 = getFullHouseList(taipei_region_code, option2, filter_func)
     # pp = pprint.PrettyPrinter(indent=4)
     # pp.pprint(house_list[0])
     return houseList1 + houseList2
