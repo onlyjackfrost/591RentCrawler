@@ -1,6 +1,6 @@
 from crawler.utils import checkStatusCode, getHouseList, getTotalNumber
 from crawler.singleton import session, csrf_Token
-import toolHelper as tool
+from crawler.logger import logCrawlProgress
 import time
 import pprint
 
@@ -44,7 +44,7 @@ def getFullHouseList(region_code, options, filter_func=None):
         # print(html_text)
 
         if html_text == "":
-            tool.logCrawlProgress("failure, fuck\n")
+            logCrawlProgress("failure, fuck\n")
             break
 
         house_list = getHouseList(html_text)
@@ -56,6 +56,6 @@ def getFullHouseList(region_code, options, filter_func=None):
         totalNumber = getTotalNumber(html_text)
         print(totalNumber, number)
         timeString = time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
-        tool.logCrawlProgress("{0}  {1}-{2}  {3}\n".format(
-            timeString, number - 30, number, totalNumber))
+        logCrawlProgress("{0}  {1}-{2}  {3}\n".format(timeString, number - 30,
+                                                      number, totalNumber))
     return houseList

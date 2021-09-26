@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import json
 import csv
 # import dbHelper as db
-import toolHelper as tool
 import time
 import pprint
 
@@ -73,10 +72,6 @@ def getFullHouseList(region_code, options):
         html_text = getHouseListHtml(session, csrf_Token, region_code, number,
                                      options)
 
-        if html_text == "":
-            tool.logCrawlProgress("failure, fuck\n")
-            break
-
         house_list = getHouseList(html_text)
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(house_list[0])
@@ -86,8 +81,6 @@ def getFullHouseList(region_code, options):
         totalNumber = getTotalNumber(html_text)
 
         timeString = time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
-        tool.logCrawlProgress("{0}  {1}-{2}  {3}\n".format(
-            timeString, number - 30, number, totalNumber))
 
 
 taipei_region_code = 1
