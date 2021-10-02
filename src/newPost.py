@@ -1,70 +1,86 @@
-import pprint
-import sys
+from sqlite.command import get_post_ids
 
-from logger.logger import logCrawlProgress
-from sqlite.command import get_post_id_in_hours
-
-sys.path.append('./src/crawler')
 from crawler.facade import crawTaipeiHouseList
 
 
-def sendNewRentPost():
+def getNewRentPost():
     def filter_posttime_in_hours(houseList):
-        return [house for house in houseList if '分鐘' in house['posttime']]
+        return [
+            house for house in houseList
+            if '分鐘' in house['posttime'] and 'post_id' in house.keys()
+        ]
 
     post_list = crawTaipeiHouseList(filter_posttime_in_hours)
-    # pp = pprint.PrettyPrinter(indent=4)
-    # pp.pprint(post_list)
-    # pp.pprint([house['posttime'] for house in post_list])
-
-    post_ids = [int(p.post_id) for p in post_list]
-    post_id_sent = get_post_id_in_hours()
-    new_post_ids = list(set(post_ids).difference(set(post_id_sent)))
-
-    # get detail of new_post_ids
-    to_send = []
-    for new_post_id in new_post_ids:
-        # detail = crawHouseDetail(new_post_id)
-        to_send.append(detail)
+    post_ids = [p['post_id'] for p in post_list]
+    post_id_sent = get_post_ids(post_ids)
+    new_posts = [
+        post for post in post_list if post['post_id'] not in post_id_sent
+    ]
 
     # format in line message format
-    # to_send = [toLineNotifyView(houseObj) for houseObj in to_send]
-
-    # # transfer to Line message view
-    try:
-        pass
-        # send_message(to_send)
-        # # send messa succeed
-        # insert_post_ids(new_post_ids)
-    except:
-        logCrawlProgress('send message or insert database failed')
-
-
-# /crawler
-def crawHouseDetail(post_id):
-    pass
+    messages = [toLineNotifyView(new_post) for new_post in new_posts]
+    new_post_ids = [post['post_id'] for post in new_posts]
+    return messages, new_post_ids
 
 
 def toLineNotifyView(house):
-    props_591 = [
-        'kind_name', 'address', 'post_id', 'role_name', 'nick_name',
-        'location', 'floorStr', 'price', 'post_id'
-    ]
+    messages = []
+    for category in category_order:
+        props = [
+            ele['prop'] for ele in props_and_categories
+            if ele['category'] == category
+        ]
+        prop_val = ', '.join([str(house[prop]) for prop in props])
+        messages.append(line_formator(category, prop_val))
 
-    return house
+    return '\n\r'.join(messages)
 
 
-def line_formator(prop, prop_val):
-    template = {
+props_and_categories = [
+    {
+        'prop': 'kind_name',
+        'category': 'kind_name'
+    },
+    {
+        'prop': 'address',
+        'category': 'address'
+    },
+    {
+        'prop': 'post_id',
+        'category': 'link'
+    },
+    {
+        'prop': 'role_name',
+        'category': 'host'
+    },
+    {
+        'prop': 'nick_name',
+        'category': 'host'
+    },
+    {
+        'prop': 'location',
+        'category': 'address'
+    },
+    {
+        'prop': 'floorStr',
+        'category': 'address'
+    },
+    {
+        'prop': 'price',
+        'category': 'price'
+    },
+]
+category_order = ['kind_name', 'address', 'price', 'host', 'link']
+
+
+def line_formator(category, prop_val):
+    category_message_template = {
         'kind_name': f'房型: {prop_val}',
         'address': f'地點資訊: {prop_val}',
         'price': f'價錢: {prop_val}',
         'host': f'屋主資訊: {prop_val}',
         'link': f'網站連結: https://rent.591.com.tw/home/{prop_val}',
     }
-    if prop not in template.keys():
-        return f'{prop}: {prop_val}'
-    return template[prop]
-
-
-sendNewRentPost()
+    if category not in category_message_template.keys():
+        return f'{category}: {prop_val}'
+    return category_message_template[category]

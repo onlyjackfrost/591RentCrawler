@@ -14,9 +14,9 @@
 
 import os
 import sys
-import schedule
 import time
 import threading
+import schedule
 from argparse import ArgumentParser
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
@@ -26,12 +26,14 @@ from linebot.models import (
     TextMessage,
     TextSendMessage,
 )
+from env import const_channel_secret, const_channel_access_token
 
 app = Flask(__name__)
 
 # get channel_secret and channel_access_token from your environment variable
-channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
-channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
+channel_secret = os.getenv('LINE_CHANNEL_SECRET', None) or const_channel_secret
+channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN',
+                                 None) or const_channel_access_token
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
     sys.exit(1)
@@ -77,15 +79,36 @@ def message_text(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=msg))
 
 
-def pushMessage():
+def sendNewRentPost():
+    from sqlite.command import addPosts
+    from logger.logger import logCrawlProgress
+    from newPost import getNewRentPost
     if userId != "":
-        line_bot_api.push_message(userId, TextSendMessage(text="Working..."))
+        messages, new_post_ids = getNewRentPost()
+        try:
+            queue = []
+            for idx, message in enumerate(messages):
+                if len(queue) <= 10:
+                    queue.append(f'{idx+1}. \n\r' + message)
+                    continue
+                textMessage = '\n\r'.join(queue)
+                line_bot_api.push_message(userId,
+                                          TextSendMessage(text=textMessage))
+                queue = []
+
+            addPosts(new_post_ids)
+            logCrawlProgress('push message and record succeed.')
+        except Exception as e:
+            print(e)
+            logCrawlProgress('send message or insert database failed')
     else:
         print("userId is empty")
 
 
 def crawlAndPush(interval: int):
-    schedule.every(interval).seconds.do(pushMessage)
+    from sqlite.command import make_table
+    make_table()
+    schedule.every(interval).seconds.do(sendNewRentPost)
     while True:
         schedule.run_pending()
         time.sleep(1)
