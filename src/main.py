@@ -17,17 +17,14 @@ import sys
 import schedule
 import time
 import threading
-import signal
 from argparse import ArgumentParser
 from flask import Flask, request, abort
-from linebot import (
-    LineBotApi, WebhookHandler
-)
-from linebot.exceptions import (
-    InvalidSignatureError
-)
+from linebot import (LineBotApi, WebhookHandler)
+from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent,
+    TextMessage,
+    TextSendMessage,
 )
 
 app = Flask(__name__)
@@ -45,6 +42,7 @@ if channel_access_token is None:
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 userId = ""
+
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -66,52 +64,62 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def message_text(event):
-    msg=""
+    msg = ""
     global userId
     if event.message.text == "start":
-        userId=event.source.user_id
-        msg="Start app for "+ userId
+        userId = event.source.user_id
+        msg = "Start app for " + userId
     elif event.message.text == "stop":
-        msg="Stop app now"
-        userId=""
+        msg = "Stop app now"
+        userId = ""
     else:
-        msg="Not recognized"
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=msg)
-    )
-    
+        msg = "Not recognized"
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=msg))
+
+
 def pushMessage():
     if userId != "":
-        line_bot_api.push_message(
-            userId,
-            TextSendMessage(text="Working...")
-        )
+        line_bot_api.push_message(userId, TextSendMessage(text="Working..."))
     else:
         print("userId is empty")
+
+
 def crawlAndPush(interval: int):
     schedule.every(interval).seconds.do(pushMessage)
     while True:
         schedule.run_pending()
         time.sleep(1)
 
+
 if __name__ == "__main__":
-    arg_parser = ArgumentParser(
-        usage='Usage: python ' + __file__ + ' [--port <port>] [--help]'
-    )
+    arg_parser = ArgumentParser(usage='Usage: python ' + __file__ +
+                                ' [--port <port>] [--help]')
     arg_parser.add_argument('-p', '--port', default=8000, help='port')
     arg_parser.add_argument('-d', '--debug', default=False, help='debug')
-    arg_parser.add_argument('-i', '--interval', default=5, help='interval time to crawl data and push (Unit: seconds)', type=int)
+    arg_parser.add_argument(
+        '-i',
+        '--interval',
+        default=5,
+        help='interval time to crawl data and push (Unit: seconds)',
+        type=int)
     options = arg_parser.parse_args()
 
     # crawling and push
-    t1 = threading.Thread(target=crawlAndPush, args=(options.interval,), daemon=True)
+    t1 = threading.Thread(target=crawlAndPush,
+                          args=(options.interval, ),
+                          daemon=True)
     t1.start()
 
     # line app
-    t2 = threading.Thread(target=app.run, kwargs={'debug':options.debug, 'port':options.port, 'use_reloader':False}, daemon=True)
+    t2 = threading.Thread(target=app.run,
+                          kwargs={
+                              'debug': options.debug,
+                              'port': options.port,
+                              'use_reloader': False
+                          },
+                          daemon=True)
     t2.start()
-    
+
     try:
         while True:
             time.sleep(1)

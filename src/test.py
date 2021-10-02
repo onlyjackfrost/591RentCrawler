@@ -1,6 +1,6 @@
-from usecases.newPost import sendNewRentPost
+from crawler.facade import test
 
-sendNewRentPost()
+test()
 '''
 
 house data structure

@@ -1,5 +1,7 @@
-from crawler.crawler import getFullHouseList
+from pprint import pprint
+from crawler.crawler import getFullHouseList, getHouseDetailHtml
 import copy
+import json
 
 taipei_region_code = 1
 newtaipei_region_code = 3
@@ -30,3 +32,19 @@ def crawTaipeiHouseList(filter_func=None):
     # pp = pprint.PrettyPrinter(indent=4)
     # pp.pprint(house_list[0])
     return houseList1 + houseList2
+
+
+def test():
+    # option1 = get_basicOption()
+    # option1['kind'] = 1  #整層住家
+    # houseList1 = getFullHouseList(taipei_region_code, option1)
+    # //*[@id="rightConFixed"]/section/div[2]/div/div[1]/span[2]
+    soup = getHouseDetailHtml(taipei_region_code)
+    rightConFixed = soup.find("div", {"id": "rightConFixed"})
+    print(rightConFixed)
+    contact = rightConFixed.find("contact")
+    print('======================')
+    print(contact)
+    # house_dict = json.loads(html_text)
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(houseList1)

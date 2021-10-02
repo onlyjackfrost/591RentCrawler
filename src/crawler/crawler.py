@@ -1,6 +1,7 @@
 from crawler.utils import checkStatusCode, getHouseList, getTotalNumber
 from crawler.singleton import session, csrf_Token
-from crawler.logger import logCrawlProgress
+from logger.logger import logCrawlProgress
+from bs4 import BeautifulSoup
 import time
 import pprint
 
@@ -16,18 +17,39 @@ def getHouseListHtml(session, region_code, row_Number, options):
     options['firstRow'] = row_Number
 
     my_headers = {'X-CSRF-TOKEN': csrf_Token}
-    # pp = pprint.PrettyPrinter(indent=4)
-    # pp.pprint(my_headers)
     response = session.get(url_getHouseListApi,
                            headers=my_headers,
                            params=options,
                            cookies={'urlJumpIp': str(region_code)})
-
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(response.text)
     if checkStatusCode(response.status_code) is False:
         return ""
 
     html_text = response.text
+    print(html_text[:30])
     return html_text
+
+
+def getHouseDetailHtml(region_code, post_id=None):
+    # url = 'https://rent.591.com.tw/rent-detail-11429247.html'
+    url = 'https://bff.591.com.tw/v1/house/rent/detail?id=11429247'
+    my_headers = {'X-CSRF-TOKEN': csrf_Token, 'Accept': 'application/json'}
+    response = session.get(
+        url,
+        headers=my_headers,
+        #    params={'id': 11429247},
+        # cookies={'urlJumpIp': str(region_code)}
+    )
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(response.text)
+    # for att in response:
+    #     pp.pprint(att)
+    html_text = response.text
+    print(html_text)
+    soup = BeautifulSoup(html_text, 'html.parser')
+    # print(soup.prettify)
+    return soup
 
 
 def getFullHouseList(region_code, options, filter_func=None):
@@ -55,7 +77,6 @@ def getFullHouseList(region_code, options, filter_func=None):
         number += 30
         totalNumber = getTotalNumber(html_text)
         print(totalNumber, number)
-        timeString = time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
-        logCrawlProgress("{0}  {1}-{2}  {3}\n".format(timeString, number - 30,
-                                                      number, totalNumber))
+        logCrawlProgress("{1}-{2}  {3}\n".format(number - 30, number,
+                                                 totalNumber))
     return houseList

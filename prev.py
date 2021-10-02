@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-import csv
 # import dbHelper as db
 import time
 import pprint
