@@ -88,14 +88,17 @@ def sendNewRentPost():
         try:
             queue = []
             for idx, message in enumerate(messages):
-                if len(queue) <= 10:
+                if len(queue) <= 5:
                     queue.append(f'{idx+1}. \n\r' + message)
                     continue
                 textMessage = '\n\r'.join(queue)
                 line_bot_api.push_message(userId,
                                           TextSendMessage(text=textMessage))
                 queue = []
-
+            if queue:
+                textMessage = '\n\r'.join(queue)
+                line_bot_api.push_message(userId,
+                                          TextSendMessage(text=textMessage))
             addPosts(new_post_ids)
             logCrawlProgress('push message and record succeed.')
         except Exception as e:

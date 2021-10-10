@@ -16,7 +16,6 @@ def getHouseListHtml(session, region_code, row_Number, options):
         return ""
 
     html_text = response.text
-    print(html_text[:30])
     return html_text
 
 
