@@ -11,12 +11,14 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-
+from functools import lru_cache
 import os
 import sys
 import time
 import threading
 import schedule
+from dotenv import load_dotenv
+
 from argparse import ArgumentParser
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
@@ -26,14 +28,13 @@ from linebot.models import (
     TextMessage,
     TextSendMessage,
 )
-from env import const_channel_secret, const_channel_access_token
 
+load_dotenv()
 app = Flask(__name__)
 
 # get channel_secret and channel_access_token from your environment variable
-channel_secret = os.getenv('LINE_CHANNEL_SECRET', None) or const_channel_secret
-channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN',
-                                 None) or const_channel_access_token
+channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
+channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
     sys.exit(1)
