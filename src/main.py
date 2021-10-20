@@ -119,39 +119,41 @@ def crawlAndPush(interval: int):
 
 
 if __name__ == "__main__":
-    # arg_parser = ArgumentParser(usage='Usage: python ' + __file__ +
-    #                             ' [--port <port>] [--help]')
-    # port = os.getenv('PORT', 8000)
-    # arg_parser.add_argument('-p', '--port', default=port, help='port')
-    # arg_parser.add_argument('-d', '--debug', default=False, help='debug')
-    # arg_parser.add_argument(
-    #     '-i',
-    #     '--interval',
-    #     default=5,
-    #     help='interval time to crawl data and push (Unit: seconds)',
-    #     type=int)
-    # options = arg_parser.parse_args()
+    arg_parser = ArgumentParser(usage='Usage: python ' + __file__ +
+                                ' [--port <port>] [--help]')
+    port = os.getenv('PORT', 8000)
+    arg_parser.add_argument('-p', '--port', default=port, help='port')
+    arg_parser.add_argument('-H', '--host', default='0.0.0.0', help='host')
+    arg_parser.add_argument('-d', '--debug', default=False, help='debug')
+    arg_parser.add_argument(
+        '-i',
+        '--interval',
+        default=5,
+        help='interval time to crawl data and push (Unit: seconds)',
+        type=int)
+    options = arg_parser.parse_args()
 
-    # # crawling and push
-    # t1 = threading.Thread(target=crawlAndPush,
-    #                       args=(options.interval, ),
-    #                       daemon=True)
-    # t1.start()
+    # crawling and push
+    t1 = threading.Thread(target=crawlAndPush,
+                          args=(options.interval, ),
+                          daemon=True)
+    t1.start()
 
-    # # line app
-    # t2 = threading.Thread(target=app.run,
-    #                       kwargs={
-    #                           'debug': options.debug,
-    #                           'port': options.port,
-    #                           'use_reloader': False
-    #                       },
-    #                       daemon=True)
-    # t2.start()
+    # line app
+    t2 = threading.Thread(target=app.run,
+                          kwargs={
+                              'debug': options.debug,
+                              'port': options.port,
+                              'host': options.host,
+                              'use_reloader': False
+                          },
+                          daemon=True)
+    t2.start()
 
-    # try:
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     print("exiting")
-    #     exit(0)
-    app.run(host='0.0.0.0', port=os.getenv('PORT'))
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("exiting")
+        exit(0)
+    # app.run(host='0.0.0.0', port=os.getenv('PORT'))
