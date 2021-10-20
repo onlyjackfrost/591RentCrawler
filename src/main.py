@@ -122,6 +122,11 @@ if __name__ == "__main__":
     arg_parser = ArgumentParser(usage='Usage: python ' + __file__ +
                                 ' [--port <port>] [--help]')
     port = os.getenv('PORT', 8000)
+    print(port)
+    print(port)
+    print(port)
+    print(port)
+    print(port)
     arg_parser.add_argument('-p', '--port', default=port, help='port')
     arg_parser.add_argument('-d', '--debug', default=False, help='debug')
     arg_parser.add_argument(
