@@ -128,7 +128,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         '-i',
         '--interval',
-        default=5,
+        default=10,
         help='interval time to crawl data and push (Unit: seconds)',
         type=int)
     options = arg_parser.parse_args()
