@@ -154,4 +154,4 @@ if __name__ == "__main__":
     # except KeyboardInterrupt:
     #     print("exiting")
     #     exit(0)
-    app.run(port=os.getenv('PORT'))
+    app.run(host='0.0.0.0', port=os.getenv('PORT'))
