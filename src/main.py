@@ -16,6 +16,7 @@ import os
 import sys
 import time
 import threading
+from healthcheck import selfHealthCheck
 import schedule
 from dotenv import load_dotenv
 
@@ -113,6 +114,7 @@ def crawlAndPush(interval: int):
     from sqlite.command import make_table
     make_table()
     schedule.every(interval).seconds.do(sendNewRentPost)
+    schedule.every(interval).seconds.do(selfHealthCheck)
     while True:
         schedule.run_pending()
         time.sleep(1)
