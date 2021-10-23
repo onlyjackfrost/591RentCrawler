@@ -122,8 +122,9 @@ if __name__ == "__main__":
     arg_parser = ArgumentParser(usage='Usage: python ' + __file__ +
                                 ' [--port <port>] [--help]')
     port = os.getenv('PORT', 8000)
+    host = '0.0.0.0' if not os.getenv('HOST') else os.getenv('HOST')
     arg_parser.add_argument('-p', '--port', default=port, help='port')
-    arg_parser.add_argument('-H', '--host', default='0.0.0.0', help='host')
+    arg_parser.add_argument('-H', '--host', default=host, help='host')
     arg_parser.add_argument('-d', '--debug', default=False, help='debug')
     arg_parser.add_argument(
         '-i',

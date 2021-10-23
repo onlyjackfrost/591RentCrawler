@@ -7,7 +7,7 @@ def getHouseListHtml(session, region_code, row_Number, options):
     url_getHouseListApi = 'https://rent.591.com.tw/home/search/rsList'
     options['firstRow'] = row_Number
 
-    my_headers = {'X-CSRF-TOKEN': csrf_Token}
+    my_headers = {'X-CSRF-TOKEN': csrf_Token, 'User-Agent': 'Custom'}
     response = session.get(url_getHouseListApi,
                            headers=my_headers,
                            params=options,
@@ -29,7 +29,6 @@ def getFullHouseList(region_code, options, filter_func=None):
             break
         loop += 1
         html_text = getHouseListHtml(session, region_code, number, options)
-
         if html_text == "":
             logCrawlProgress("failure, fuck\n")
             break
