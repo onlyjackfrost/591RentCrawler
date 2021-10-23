@@ -1,17 +1,33 @@
 from crawler.utils import checkStatusCode, getHouseList, getTotalNumber
-from crawler.singleton import session, csrf_Token
+from crawler.singleton import session_591
 from logger.logger import logCrawlProgress
 
 
-def getHouseListHtml(session, region_code, row_Number, options):
+def session():
+    return session_591.session
+
+
+def token():
+    return session_591.token
+
+
+def getHouseListHtml(region_code, row_Number, options):
     url_getHouseListApi = 'https://rent.591.com.tw/home/search/rsList'
     options['firstRow'] = row_Number
 
-    my_headers = {'X-CSRF-TOKEN': csrf_Token, 'User-Agent': 'Custom'}
-    response = session.get(url_getHouseListApi,
-                           headers=my_headers,
-                           params=options,
-                           cookies={'urlJumpIp': str(region_code)})
+    my_headers = {'X-CSRF-TOKEN': token(), 'User-Agent': 'Custom'}
+    response = session().get(url_getHouseListApi,
+                             headers=my_headers,
+                             params=options,
+                             cookies={'urlJumpIp': str(region_code)})
+    if response.status_code == 419:
+        session_591.update_token()
+        my_headers['X-CSRF-TOKEN'] = token()
+        print('csrf-token updated')
+        response = session().get(url_getHouseListApi,
+                                 headers=my_headers,
+                                 params=options,
+                                 cookies={'urlJumpIp': str(region_code)})
     if checkStatusCode(response.status_code) is False:
         return ""
 
@@ -28,7 +44,7 @@ def getFullHouseList(region_code, options, filter_func=None):
         if loop > 20:
             break
         loop += 1
-        html_text = getHouseListHtml(session, region_code, number, options)
+        html_text = getHouseListHtml(region_code, number, options)
         if html_text == "":
             logCrawlProgress("failure, fuck\n")
             break
