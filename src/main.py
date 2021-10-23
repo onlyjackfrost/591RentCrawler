@@ -126,10 +126,15 @@ if __name__ == "__main__":
     arg_parser.add_argument('-p', '--port', default=port, help='port')
     arg_parser.add_argument('-H', '--host', default=host, help='host')
     arg_parser.add_argument('-d', '--debug', default=False, help='debug')
+
+    # crawler argument
+    interval_value = 60 * 5 if not os.getenv(
+        'CRAW_INTERVAL_VALUE_IN_SEC') else os.getenv(
+            'CRAW_INTERVAL_VALUE_IN_SEC')
     arg_parser.add_argument(
         '-i',
         '--interval',
-        default=10,
+        default=interval_value,
         help='interval time to crawl data and push (Unit: seconds)',
         type=int)
     options = arg_parser.parse_args()
