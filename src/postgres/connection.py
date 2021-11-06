@@ -1,25 +1,31 @@
 import psycopg2
+import os
 
 
 class PostgresBaseManager:
     def __init__(self):
-
-        self.database = 'ddgqsob1cb7grd'
-        self.user = 'numycwzotvesnu'
-        self.password = 'fd2c43fca696a12eee0d80ee88eb6f7a8f654a2107670cab896c98936b3f6028'
-        self.host = 'ec2-3-221-140-141.compute-1.amazonaws.com'
+        self.database = os.getenv('POSTGRES_DATABASE', None)
+        self.user = os.getenv('POSTGRES_USER', None)
+        self.password = os.getenv('POSTGRES_PASSWORD', None)
+        self.host = os.getenv('POSTGRES_host', None)
         self.port = '5432'
+        self.database_url = os.getenv('DATABASE_URL', None)
         self.conn = self.connectServerPostgresDb()
 
     def connectServerPostgresDb(self):
         """
         :return: 連接 Heroku Postgres SQL 認證用
         """
-        conn = psycopg2.connect(database=self.database,
-                                user=self.user,
-                                password=self.password,
-                                host=self.host,
-                                port=self.port)
+        if self.database_url:
+            print('connection with url')
+            conn = psycopg2.connect(self.database_url, sslmode='require')
+        else:
+            print('connection with user')
+            conn = psycopg2.connect(database=self.database,
+                                    user=self.user,
+                                    password=self.password,
+                                    host=self.host,
+                                    port=self.port)
         return conn
 
     def closePostgresConnection(self):
