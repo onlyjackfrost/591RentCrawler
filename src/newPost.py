@@ -1,4 +1,4 @@
-from sqlite.command import get_post_ids
+from postgres.command import get_post_ids
 
 from crawler.facade import crawTaipeiHouseList
 

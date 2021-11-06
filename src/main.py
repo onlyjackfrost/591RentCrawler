@@ -11,7 +11,6 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-from functools import lru_cache
 import os
 import sys
 import time
@@ -82,7 +81,7 @@ def message_text(event):
 
 
 def sendNewRentPost():
-    from sqlite.command import addPosts
+    from postgres.command import addPosts
     from logger.logger import logCrawlProgress
     from newPost import getNewRentPost
     if userId != "":
@@ -111,8 +110,8 @@ def sendNewRentPost():
 
 
 def crawlAndPush(interval: int):
-    from sqlite.command import make_table
-    make_table()
+    # from sqlite.command import make_table
+    # make_table()
     schedule.every(interval).seconds.do(sendNewRentPost)
     schedule.every(interval).seconds.do(selfHealthCheck)
     while True:
