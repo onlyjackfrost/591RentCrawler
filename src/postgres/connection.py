@@ -4,6 +4,8 @@ import os
 
 class PostgresBaseManager:
     def __init__(self):
+        from dotenv import load_dotenv
+        load_dotenv()
         self.database = os.getenv('POSTGRES_DATABASE', None)
         self.user = os.getenv('POSTGRES_USER', None)
         self.password = os.getenv('POSTGRES_PASSWORD', None)
@@ -53,10 +55,17 @@ class PostgresBaseManager:
                 post_id INT NOT NULL,
                 create_time TIMESTAMP 
             );''')
+        # cur.execute('''
+        #     CREATE INDEX idx_POST_post_id
+        #     ON POST(post_id);
+        #     ''')
         cur.execute('''
-            CREATE INDEX idx_POST_post_id 
-            ON POST(post_id);
-            ''')
+            CREATE TABLE IF NOT EXISTS Line_users(
+                id serial PRIMARY KEY,
+                user_id VARCHAR(300) NOT NULL UNIQUE,
+                create_time TIMESTAMP
+            )
+        ''')
         self.conn.commit()
         print('database schema initialization done')
         cur.close()

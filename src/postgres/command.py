@@ -28,3 +28,19 @@ def get_all_post_id():
     cur.execute(f'SELECT post_id FROM POST')
     cursor = cur.fetchall()
     print('current number of post_id:', len(cursor))
+
+
+def add_user(user_id):
+    cur = conn.cursor()
+    cur.execute(f'INSERT INTO Line_users (user_id) VALUES {user_id}')
+    conn.commit()
+
+
+def get_user_id():
+    cur = conn.cursor()
+    cur.execute(f'SELECT user_id FROM Line_users LIMIT 1')
+    cursor = cur.fetchall()
+    if not cursor:
+        return None
+    else:
+        return cursor[0]['user_id']

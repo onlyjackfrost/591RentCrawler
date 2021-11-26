@@ -16,9 +16,9 @@ import sys
 import time
 import threading
 from healthcheck import selfHealthCheck
+
 import schedule
 from dotenv import load_dotenv
-
 from argparse import ArgumentParser
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
@@ -44,7 +44,8 @@ if channel_access_token is None:
 #
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
-userId = ""
+userId = ''
+print('user:', userId)
 
 
 @app.route("/callback", methods=['POST'])
@@ -67,23 +68,31 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def message_text(event):
+    from postgres.command import add_user
     msg = ""
     global userId
     if event.message.text == "start":
         userId = event.source.user_id
         msg = "Start app for " + userId
+        add_user(event.source.user_id)
     elif event.message.text == "stop":
         msg = "Stop app now"
         userId = ""
+        add_user(event.source.user_id)
     else:
         msg = "Not recognized"
+    print('userId: ', userId)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=msg))
 
 
 def sendNewRentPost():
-    from postgres.command import addPosts
+    from postgres.command import addPosts, get_user_id
     from logger.logger import logCrawlProgress
     from newPost import getNewRentPost
+    global userId
+    if not userId:
+        userId = get_user_id()
+        print('get user from db:', userId)
     if userId != "":
         messages, new_post_ids = getNewRentPost()
         try:
