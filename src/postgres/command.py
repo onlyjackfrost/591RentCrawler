@@ -43,4 +43,4 @@ def get_user_id():
     if not cursor:
         return None
     else:
-        return cursor[0]['user_id']
+        return [row[0] for row in cursor]

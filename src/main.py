@@ -93,7 +93,8 @@ def sendNewRentPost():
     if not userId:
         exist_user_id = get_user_id()
         if exist_user_id:
-            userId = exist_user_id
+            print('===', exist_user_id)
+            userId = exist_user_id[0]
         print('get user from db:', exist_user_id)
     if userId != "":
         messages, new_post_ids = getNewRentPost()
