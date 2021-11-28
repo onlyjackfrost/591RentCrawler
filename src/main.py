@@ -91,8 +91,10 @@ def sendNewRentPost():
     from newPost import getNewRentPost
     global userId
     if not userId:
-        userId = get_user_id()
-        print('get user from db:', userId)
+        exist_user_id = get_user_id()
+        if exist_user_id:
+            userId = exist_user_id
+        print('get user from db:', exist_user_id)
     if userId != "":
         messages, new_post_ids = getNewRentPost()
         try:
