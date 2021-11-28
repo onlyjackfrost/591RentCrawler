@@ -32,7 +32,7 @@ def get_all_post_id():
 
 def add_user(user_id):
     cur = conn.cursor()
-    cur.execute(f'INSERT INTO Line_users (user_id) VALUES ({user_id})')
+    cur.execute(f'INSERT INTO Line_users (user_id) VALUES (\'{user_id}\')')
     conn.commit()
 
 
