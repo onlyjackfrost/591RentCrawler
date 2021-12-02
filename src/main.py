@@ -68,17 +68,21 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def message_text(event):
-    from postgres.command import add_user
+    from postgres.command import add_user, get_user_id
     msg = ""
     global userId
     if event.message.text == "start":
         userId = event.source.user_id
         msg = "Start app for " + userId
-        add_user(event.source.user_id)
+        exist_user_id = get_user_id()
+        if not exist_user_id:
+            add_user(event.source.user_id)
     elif event.message.text == "stop":
         msg = "Stop app now"
         userId = ""
-        add_user(event.source.user_id)
+        exist_user_id = get_user_id()
+        if not exist_user_id:
+            add_user(event.source.user_id)
     else:
         msg = "Not recognized"
     print('userId: ', userId)
