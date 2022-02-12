@@ -11,14 +11,14 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations
 #  under the License.
-from functools import lru_cache
 import os
 import sys
 import time
 import threading
+from healthcheck import selfHealthCheck
+
 import schedule
 from dotenv import load_dotenv
-
 from argparse import ArgumentParser
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
@@ -44,7 +44,8 @@ if channel_access_token is None:
 #
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
-userId = ""
+userId = ''
+print('user:', userId)
 
 
 @app.route("/callback", methods=['POST'])
@@ -67,23 +68,36 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def message_text(event):
+    from postgres.command import add_user, get_user_id
     msg = ""
     global userId
     if event.message.text == "start":
         userId = event.source.user_id
         msg = "Start app for " + userId
+        exist_user_id = get_user_id()
+        if not exist_user_id:
+            add_user(event.source.user_id)
     elif event.message.text == "stop":
         msg = "Stop app now"
         userId = ""
+        exist_user_id = get_user_id()
+        if not exist_user_id:
+            add_user(event.source.user_id)
     else:
         msg = "Not recognized"
+    print('userId: ', userId)
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=msg))
 
 
 def sendNewRentPost():
-    from sqlite.command import addPosts
+    from postgres.command import addPosts, get_user_id
     from logger.logger import logCrawlProgress
     from newPost import getNewRentPost
+    global userId
+    if not userId:
+        exist_user_id = get_user_id()
+        if exist_user_id:
+            userId = exist_user_id[0]
     if userId != "":
         messages, new_post_ids = getNewRentPost()
         try:
@@ -110,9 +124,10 @@ def sendNewRentPost():
 
 
 def crawlAndPush(interval: int):
-    from sqlite.command import make_table
-    make_table()
+    # from sqlite.command import make_table
+    # make_table()
     schedule.every(interval).seconds.do(sendNewRentPost)
+    schedule.every(interval).seconds.do(selfHealthCheck)
     while True:
         schedule.run_pending()
         time.sleep(1)
