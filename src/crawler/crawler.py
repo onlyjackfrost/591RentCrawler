@@ -51,7 +51,7 @@ def getFullHouseList(region_code, options, filter_func=None):
             break
 
         house_list = getHouseList(html_text)
-        print(set([house['sectionname'] for house in house_list]))
+        # print(set([house['sectionname'] for house in house_list]))
         number += len(house_list)
         if filter_func:
             house_list = filter_func(house_list)
