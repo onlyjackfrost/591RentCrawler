@@ -99,7 +99,11 @@ def sendNewRentPost():
         if exist_user_id:
             userId = exist_user_id[0]
     if userId != "":
-        messages, new_post_ids = getNewRentPost()
+        try:
+            messages, new_post_ids = getNewRentPost()
+        except Exception as e:
+            print(e)
+            return
         try:
             queue = []
             for idx, message in enumerate(messages):
