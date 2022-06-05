@@ -36,11 +36,12 @@ class PostgresBaseManager:
 
         else:
             print('connection with user')
-            pq_pool = pool.SimpleConnectionPool(database=database,
+            pq_pool = pool.SimpleConnectionPool(1,10,
+                                                database=database,
                                                 user=user,
                                                 password=password,
                                                 host=host,
-                                                port=port,minconn=2, maxconn=5)
+                                                port=port)
         return pq_pool
 
 
