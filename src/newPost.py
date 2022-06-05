@@ -1,17 +1,26 @@
 from postgres.command import get_post_ids
 
-from crawler.facade import crawTaipeiHouseList
+from crawler.facade import crawNewTaipeiLocationsHouseList, crawTaipeiHouseList
+
+
+def filter_posttime_in_hours(houseList):
+    return [
+        house for house in houseList
+        if ('分鐘' in house['posttime'] or '小時' in house['posttime'])
+        and 'post_id' in house.keys()
+    ]
 
 
 def getNewRentPost():
-    def filter_posttime_in_hours(houseList):
-        return [
-            house for house in houseList
-            if ('分鐘' in house['posttime'] or '小時' in house['posttime'])
-            and 'post_id' in house.keys()
-        ]
+    post_list = []
+    posts = crawTaipeiHouseList(filter_posttime_in_hours)
+    post_list += posts
 
-    post_list = crawTaipeiHouseList(filter_posttime_in_hours)
+    posts = crawNewTaipeiLocationsHouseList(
+        filter_posttime_in_hours, locations=[26, 43, 38, 37, 44, 34, 27, 47])
+    # 板橋 三重 中和 永和 新莊 新店 汐止 蘆洲
+    post_list += posts
+
     post_ids = [p['post_id'] for p in post_list]
     post_id_sent = get_post_ids(post_ids)
     new_posts = [

@@ -15,19 +15,20 @@ def getHouseListHtml(region_code, row_Number, options):
     url_getHouseListApi = 'https://rent.591.com.tw/home/search/rsList'
     options['firstRow'] = row_Number
 
+    # csrf-token 有綁縣市 不同縣市要用不同的csrf-token
+    if not session_591.token:
+        session_591.update_token()
+    if session_591.region_code != region_code:
+        session_591.region_code = region_code
+        session_591.update_token()
+        print('csrf-token updated')
     my_headers = {'X-CSRF-TOKEN': token(), 'User-Agent': 'Custom'}
     response = session().get(url_getHouseListApi,
                              headers=my_headers,
                              params=options,
-                             cookies={'urlJumpIp': str(region_code)})
-    if response.status_code == 419:
-        session_591.update_token()
-        my_headers['X-CSRF-TOKEN'] = token()
-        print('csrf-token updated')
-        response = session().get(url_getHouseListApi,
-                                 headers=my_headers,
-                                 params=options,
-                                 cookies={'urlJumpIp': str(region_code)})
+                             cookies={
+                                 'urlJumpIp': str(region_code),
+                             })
     if checkStatusCode(response.status_code) is False:
         return ""
 
@@ -50,6 +51,7 @@ def getFullHouseList(region_code, options, filter_func=None):
             break
 
         house_list = getHouseList(html_text)
+        # print(set([house['sectionname'] for house in house_list]))
         number += len(house_list)
         if filter_func:
             house_list = filter_func(house_list)
