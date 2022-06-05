@@ -40,7 +40,7 @@ class PostgresBaseManager:
                                                 user=user,
                                                 password=password,
                                                 host=host,
-                                                port=port)
+                                                port=port,minconn=2, maxconn=5)
         return pq_pool
 
 
