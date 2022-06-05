@@ -31,7 +31,7 @@ class PostgresBaseManager:
                 1,
                 10,
                 database_url,
-                sslmode='require',
+                sslmode='require',minconn=2, maxconn=5
             )
 
         else:
