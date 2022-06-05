@@ -21,7 +21,7 @@ class PostgresBaseManager:
                                     port=port,
                                     database_url=database_url)
 
-    def createPool(self, database, user, password, host, port, database_url):
+    def createPool(self, database, user, password, host, port, database_url, minconn=1,maxconn=10):
         """
         :return: 連接 Heroku Postgres SQL 認證用
         """
@@ -29,20 +29,21 @@ class PostgresBaseManager:
             print('connection with url')
             pq_pool = pool.SimpleConnectionPool(
                 1,
-                10,
+                20,
                 database_url,
-                sslmode='require',minconn=2, maxconn=5
+                sslmode='require'
             )
 
         else:
             print('connection with user')
-            pq_pool = pool.SimpleConnectionPool(1,10,
+            pq_pool = pool.SimpleConnectionPool(1,
+                                                20,
                                                 database=database,
                                                 user=user,
                                                 password=password,
                                                 host=host,
                                                 port=port)
-                                                
+
         return pq_pool
 
 
@@ -65,7 +66,7 @@ def runTest():
     postgres_manager.pool.putconn(conn)
 
 
-def initSchema(self):
+def initSchema():
     conn = postgres_manager.pool.getconn()
     # create schema
     cur = conn.cursor()
@@ -86,7 +87,7 @@ def initSchema(self):
             create_time TIMESTAMP
         )
     ''')
-    self.conn.commit()
+    conn.commit()
     print('database schema initialization done')
     cur.close()
 
@@ -95,6 +96,5 @@ def initSchema(self):
 
 if __name__ == '__main__':
     postgres_manager = PostgresBaseManager()
-    postgres_manager.runTest()
-    postgres_manager.initSchema()
-    postgres_manager.closePostgresConnection()
+    runTest()
+    initSchema()
