@@ -23,8 +23,10 @@ def QueryStringPrice(option, price):
     option['multiPrice'] = prices[price]
 
 
-def crawTaipeiHouseList(filter_func=None):
+def crawTaipeiHouseList(filter_func=None, options=None):
     option1 = basicQueryString()
+    if options:
+        option1.update(options)
     option1['kind'] = 1  #整層住家
     QueryStringPrice(option1, 10000)
     houseList1 = getFullHouseList(taipei_region_code, option1, filter_func)
@@ -32,6 +34,8 @@ def crawTaipeiHouseList(filter_func=None):
     houseList2 = getFullHouseList(taipei_region_code, option1, filter_func)
 
     option2 = basicQueryString()
+    if options:
+        option1.update(options)
     option2['kind'] = 2  #獨立套房
     option2['other'] = 'lift'  #有電梯
     QueryStringPrice(option2, 10000)
@@ -42,8 +46,8 @@ def crawTaipeiHouseList(filter_func=None):
     return houseList1 + houseList2 + houseList3 + houseList4
 
 
-def crawNewTaipeiLocationsHouseList(filter_func=None, locations=[]):
-    def query_by_location(filter_func=None, location=0):
+def crawNewTaipeiLocationsHouseList(filter_func=None, locations=[], options=None):
+    def query_by_location(filter_func=None, location=0, options=None):
         house_list = []
         option = basicQueryString()
         # option['region'] = 3
@@ -52,6 +56,8 @@ def crawNewTaipeiLocationsHouseList(filter_func=None, locations=[]):
         #整層住家 & 1~2w 2~3w
         option['kind'] = 1
         QueryStringPrice(option, 10000)
+        if options:
+            option.update(options)
         houses = getFullHouseList(newtaipei_region_code, option, filter_func)
         house_list += houses
         QueryStringPrice(option, 20000)
@@ -61,6 +67,8 @@ def crawNewTaipeiLocationsHouseList(filter_func=None, locations=[]):
         option['kind'] = 2  #獨立套房
         option['other'] = 'lift'  #有電梯
         QueryStringPrice(option, 10000)
+        if options:
+            option.update(options)
         houses = getFullHouseList(newtaipei_region_code, option, filter_func)
         house_list += houses
         QueryStringPrice(option, 20000)

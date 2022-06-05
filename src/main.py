@@ -29,6 +29,8 @@ from linebot.models import (
     TextSendMessage,
 )
 
+from util import get_message_destination
+
 load_dotenv()
 app = Flask(__name__)
 
@@ -99,26 +101,31 @@ def sendNewRentPost():
         if exist_user_id:
             userId = exist_user_id[0]
     if userId != "":
-        messages, new_post_ids = getNewRentPost()
-        try:
-            queue = []
-            for idx, message in enumerate(messages):
-                if len(queue) <= 5:
-                    queue.append(f'{idx+1}. \n\r' + message)
-                    continue
-                textMessage = '\n\r'.join(queue)
-                line_bot_api.push_message(userId,
-                                          TextSendMessage(text=textMessage))
+        group_messages = getNewRentPost()
+        for group_name, val in group_messages.items():
+            to = get_message_destination(group_name)
+            if not to:
+                to = userId
+            messages, new_post_ids = val['messages'], val['post_ids']
+            try:
                 queue = []
-            if queue:
-                textMessage = '\n\r'.join(queue)
-                line_bot_api.push_message(userId,
-                                          TextSendMessage(text=textMessage))
-            addPosts(new_post_ids)
-            logCrawlProgress('push message and record succeed.')
-        except Exception as e:
-            print(e)
-            logCrawlProgress('send message or insert database failed')
+                for idx, message in enumerate(messages):
+                    if len(queue) <= 5:
+                        queue.append(f'{idx+1}. \n\r' + message)
+                        continue
+                    textMessage = '\n\r'.join(queue)
+                    line_bot_api.push_message(to,
+                                              TextSendMessage(text=textMessage))
+                    queue = []
+                if queue:
+                    textMessage = '\n\r'.join(queue)
+                    line_bot_api.push_message(to,
+                                              TextSendMessage(text=textMessage))
+                addPosts(new_post_ids)
+                logCrawlProgress('push message and record succeed.')
+            except Exception as e:
+                print(e)
+                logCrawlProgress('send message or insert database failed')
     else:
         print("userId is empty")
 

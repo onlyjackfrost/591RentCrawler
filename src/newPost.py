@@ -1,6 +1,7 @@
 from postgres.command import get_post_ids
 
 from crawler.facade import crawNewTaipeiLocationsHouseList, crawTaipeiHouseList
+from util import filter_sent_post
 
 
 def filter_posttime_in_hours(houseList):
@@ -10,28 +11,45 @@ def filter_posttime_in_hours(houseList):
         and 'post_id' in house.keys()
     ]
 
+def group_message(taipei_posts, new_taipei_posts, high_price_posts):
+    group_messages = {}
+    taipei_post_messages = [toLineNotifyView(post) for post in taipei_posts]
+    taipei_post_ids = [post['post_id'] for post in taipei_posts]
+    group_messages['taipei'] = {'messages':taipei_post_messages, 'post_ids':taipei_post_ids}
+
+    new_taipei_post_messages = [toLineNotifyView(post) for post in new_taipei_posts]
+    new_taipei_post_ids = [post['post_id'] for post in new_taipei_posts]
+    group_messages['new_taipei'] = {'messages':new_taipei_post_messages, 'post_ids':new_taipei_post_ids}
+
+    high_price_post_messages = [toLineNotifyView(post) for post in high_price_posts]
+    high_price_post_ids = [post['post_id'] for post in high_price_posts]
+    group_messages['high_price'] = {'messages':high_price_post_messages, 'post_ids':high_price_post_ids}
+    return group_messages
 
 def getNewRentPost():
-    post_list = []
-    posts = crawTaipeiHouseList(filter_posttime_in_hours)
-    post_list += posts
+    taipei_posts = crawTaipeiHouseList(filter_posttime_in_hours)
 
-    posts = crawNewTaipeiLocationsHouseList(
+    new_taipei_posts = crawNewTaipeiLocationsHouseList(
         filter_posttime_in_hours, locations=[26, 43, 38, 37, 44, 34, 27, 47])
     # 板橋 三重 中和 永和 新莊 新店 汐止 蘆洲
-    post_list += posts
+    
+    high_price_options = {'multiPrice':'30000_40000'}
+    high_price_posts = []
+    high_price_posts_taipei = crawTaipeiHouseList(filter_posttime_in_hours, options=high_price_options)
+    high_price_posts_new_taipei = crawNewTaipeiLocationsHouseList(
+        filter_posttime_in_hours, locations=[26, 43, 38, 37, 44, 34, 27, 47],  options=high_price_options)
+    high_price_posts = high_price_posts + high_price_posts_taipei + high_price_posts_new_taipei
 
-    post_ids = [p['post_id'] for p in post_list]
+    all_posts = taipei_posts+ new_taipei_posts + high_price_posts_taipei + high_price_posts_new_taipei
+    post_ids = [p['post_id'] for p in all_posts]
     post_id_sent = get_post_ids(post_ids)
-    new_posts = [
-        post for post in post_list if post['post_id'] not in post_id_sent
-    ]
 
-    # format in line message format
-    print(len(new_posts))
-    messages = [toLineNotifyView(new_post) for new_post in new_posts]
-    new_post_ids = [post['post_id'] for post in new_posts]
-    return messages, new_post_ids
+    taipei_posts = filter_sent_post(taipei_posts, post_id_sent)
+    new_taipei_posts = filter_sent_post(taipei_posts, post_id_sent)
+    high_price_posts = filter_sent_post(taipei_posts, post_id_sent)
+
+    group_messages = group_message(taipei_posts, new_taipei_posts, high_price_posts)
+    return group_messages
 
 
 def toLineNotifyView(house):
